@@ -29,7 +29,14 @@ Docker system df
 ## 解决问题
 既然我们已经发现了是由于Docker创建的volume里的数据占用太多导致的问题，那么问题就简单了，我们直接先使用docker volume prune来删除掉没有被容器使用的volume
 
-我们确定好哪一个volume战胜过大，使用以下命名查看空上volume被哪个容器使用:
+通过
+```
+docker system df
+```
+可以查看volume的links是否为0,为0时说明没被使用
+![](/images/16811173663912.jpg)
+
+我们确定好哪一个volume占用过大，且LINKS=1时， 使用以下命名查看空上volume被哪个容器使用:
 ```
 docker ps -a --filter volume=xxxxxxx
 ```
