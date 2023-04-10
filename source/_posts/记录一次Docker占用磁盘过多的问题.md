@@ -2,6 +2,9 @@
 title: 记录一次Docker占用磁盘过多的问题
 tags: Docker
 date: 2023-04-10 16:43:03
+categories:
+- Docker
+- 云原生
 ---
 
 ## 概述

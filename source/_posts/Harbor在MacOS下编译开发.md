@@ -2,6 +2,9 @@
 title: Harbor在MacOS下编译开发
 date: 2023-04-07 14:56:52
 tags: Harbor、registry
+categories:
+- Harbor
+- 云原生
 ---
 Harbor是一个云原生容器镜像仓库，Harbor比原生的registry多了用户管理与权限管理功能，所以使用起来还是很方便， 这里记录一下Harbor在MacOS下的编译与扩展开发. 本文是基于Harbor 2.7.0 release测试，别的版本可能会有出入。
 ## requirment
