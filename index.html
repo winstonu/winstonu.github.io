@@ -103,7 +103,10 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Docker system df</span><br></pre></td></tr></table></figure>
 <p><img src="/images/16811089305443.jpg"><br>也可以清晰的看到docker的镜像与建立的volumes占用的磁盘空间，现在的图片是被我清掉以后，在清掉之前，volume占用空间32G， 50G大小的磁盘被占满，所以才会出现CD的时候写入报错的情况。</p>
 <h2 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h2><p>既然我们已经发现了是由于Docker创建的volume里的数据占用太多导致的问题，那么问题就简单了，我们直接先使用docker volume prune来删除掉没有被容器使用的volume</p>
-<p>我们确定好哪一个volume战胜过大，使用以下命名查看空上volume被哪个容器使用:</p>
+<p>通过</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker system df</span><br></pre></td></tr></table></figure>
+<p>可以查看volume的links是否为0,为0时说明没被使用<br><img src="/images/16811173663912.jpg"></p>
+<p>我们确定好哪一个volume占用过大，且LINKS&#x3D;1时， 使用以下命名查看空上volume被哪个容器使用:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -a --filter volume=xxxxxxx</span><br></pre></td></tr></table></figure>
 <p>最终看到这个volume是我之前测试仓库时创建的registry仓库，已经停了好久了，所以直接将这个容器删除，重新执行:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
@@ -112,7 +115,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/04/10/%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1Docker%E5%8D%A0%E7%94%A8%E7%A3%81%E7%9B%98%E8%BF%87%E5%A4%9A%E7%9A%84%E9%97%AE%E9%A2%98/" data-id="clgal86y70004dbotehiha144" data-title="记录一次Docker占用磁盘过多的问题" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2023/04/10/%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1Docker%E5%8D%A0%E7%94%A8%E7%A3%81%E7%9B%98%E8%BF%87%E5%A4%9A%E7%9A%84%E9%97%AE%E9%A2%98/" data-id="clgam00uu0004dup336ve7k37" data-title="记录一次Docker占用磁盘过多的问题" class="article-share-link">Share</a>
       
       
       
@@ -129,7 +132,7 @@
     <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/04/10/hello-world/" class="article-date">
-  <time class="dt-published" datetime="2023-04-10T08:44:28.289Z" itemprop="datePublished">2023-04-10</time>
+  <time class="dt-published" datetime="2023-04-10T09:06:02.777Z" itemprop="datePublished">2023-04-10</time>
 </a>
     
   </div>
@@ -165,7 +168,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/04/10/hello-world/" data-id="clgal86y50003dbotczo1a2ic" data-title="Hello World" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2023/04/10/hello-world/" data-id="clgam00us0003dup33w9mckge" data-title="Hello World" class="article-share-link">Share</a>
       
       
       
@@ -220,7 +223,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/04/07/Harbor%E5%9C%A8MacOS%E4%B8%8B%E7%BC%96%E8%AF%91%E5%BC%80%E5%8F%91/" data-id="clgal86y00001dbotgz7a6uil" data-title="Harbor在MacOS下编译开发" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2023/04/07/Harbor%E5%9C%A8MacOS%E4%B8%8B%E7%BC%96%E8%AF%91%E5%BC%80%E5%8F%91/" data-id="clgam00uo0001dup3bd9y7ge3" data-title="Harbor在MacOS下编译开发" class="article-share-link">Share</a>
       
       
       
@@ -283,7 +286,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/04/07/Docker%E5%AE%89%E8%A3%85/" data-id="clgal86xu0000dbot3xwl29pr" data-title="Docker安装" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2023/04/07/Docker%E5%AE%89%E8%A3%85/" data-id="clgam00uf0000dup33hbo9812" data-title="Docker安装" class="article-share-link">Share</a>
       
       
       
