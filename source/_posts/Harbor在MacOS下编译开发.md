@@ -1,7 +1,7 @@
 ---
 title: Harbor在MacOS下编译开发
 date: 2023-04-07 14:56:52
-tags: Harbor、registry、build
+tags: Harbor、registry
 ---
 Harbor是一个云原生容器镜像仓库，Harbor比原生的registry多了用户管理与权限管理功能，所以使用起来还是很方便， 这里记录一下Harbor在MacOS下的编译与扩展开发. 本文是基于Harbor 2.7.0 release测试，别的版本可能会有出入。
 ## requirment
@@ -9,6 +9,7 @@ Harbor是一个云原生容器镜像仓库，Harbor比原生的registry多了用
 - 另外可能还需要https_proxy
 - golang 1.20.x
 - docker 23.x
+
 
 需要注意的是，在macos中， docker与宿主机的通信不是通过Bridge，这个时候如果要使用到了https_proxy,且https_proxy是监听在宿主机上的127.0.0.1:1087这种地址的时候，需要使用host.docker.internal:1087来访问https_proxy（如果不用则不需要设置)
 
