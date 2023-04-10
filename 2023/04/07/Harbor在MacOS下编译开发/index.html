@@ -14,9 +14,9 @@
 <meta property="og:description" content="Harbor是一个云原生容器镜像仓库，Harbor比原生的registry多了用户管理与权限管理功能，所以使用起来还是很方便， 这里记录一下Harbor在MacOS下的编译与扩展开发. 本文是基于Harbor 2.7.0 release测试，别的版本可能会有出入。 requirment Harbor在本地编译时，由于所需的依赖包过多，而且大部分是从dockerhub官方仓库下载，所以在国内有的时候">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2023-04-07T14:56:52.000Z">
-<meta property="article:modified_time" content="2023-04-10T09:06:02.777Z">
+<meta property="article:modified_time" content="2023-04-10T13:01:18.958Z">
 <meta property="article:author" content="cooper">
-<meta property="article:tag" content="Harbor、registry、build">
+<meta property="article:tag" content="Harbor、registry">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="Cooper x 空间" type="application/atom+xml">
@@ -117,11 +117,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/04/07/Harbor%E5%9C%A8MacOS%E4%B8%8B%E7%BC%96%E8%AF%91%E5%BC%80%E5%8F%91/" data-id="clgam00uo0001dup3bd9y7ge3" data-title="Harbor在MacOS下编译开发" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2023/04/07/Harbor%E5%9C%A8MacOS%E4%B8%8B%E7%BC%96%E8%AF%91%E5%BC%80%E5%8F%91/" data-id="clgauehqw0001c0oxas7y1o9n" data-title="Harbor在MacOS下编译开发" class="article-share-link">Share</a>
       
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Harbor%E3%80%81registry%E3%80%81build/" rel="tag">Harbor、registry、build</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Harbor%E3%80%81registry/" rel="tag">Harbor、registry</a></li></ul>
 
     </footer>
   </div>
@@ -129,11 +129,11 @@
     
 <nav id="article-nav">
   
-    <a href="/2023/04/10/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2023/04/10/%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1Docker%E5%8D%A0%E7%94%A8%E7%A3%81%E7%9B%98%E8%BF%87%E5%A4%9A%E7%9A%84%E9%97%AE%E9%A2%98/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
-          Hello World
+          记录一次Docker占用磁盘过多的问题
         
       </div>
     </a>
@@ -161,7 +161,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker-Volume%E3%80%81%E7%A3%81%E7%9B%98%E5%86%99%E6%BB%A1/" rel="tag">Docker Volume、磁盘写满</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker%E3%80%81%E4%BA%91%E5%8E%9F%E7%94%9F/" rel="tag">Docker、云原生</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Harbor%E3%80%81registry%E3%80%81build/" rel="tag">Harbor、registry、build</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker%E3%80%81%E4%BA%91%E5%8E%9F%E7%94%9F/" rel="tag">Docker、云原生</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Harbor%E3%80%81registry/" rel="tag">Harbor、registry</a></li></ul>
     </div>
   </div>
 
@@ -171,7 +171,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Docker-Volume%E3%80%81%E7%A3%81%E7%9B%98%E5%86%99%E6%BB%A1/" style="font-size: 10px;">Docker Volume、磁盘写满</a> <a href="/tags/Docker%E3%80%81%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 10px;">Docker、云原生</a> <a href="/tags/Harbor%E3%80%81registry%E3%80%81build/" style="font-size: 10px;">Harbor、registry、build</a>
+      <a href="/tags/Docker/" style="font-size: 10px;">Docker</a> <a href="/tags/Docker%E3%80%81%E4%BA%91%E5%8E%9F%E7%94%9F/" style="font-size: 10px;">Docker、云原生</a> <a href="/tags/Harbor%E3%80%81registry/" style="font-size: 10px;">Harbor、registry</a>
     </div>
   </div>
 
@@ -194,10 +194,6 @@
         
           <li>
             <a href="/2023/04/10/%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1Docker%E5%8D%A0%E7%94%A8%E7%A3%81%E7%9B%98%E8%BF%87%E5%A4%9A%E7%9A%84%E9%97%AE%E9%A2%98/">记录一次Docker占用磁盘过多的问题</a>
-          </li>
-        
-          <li>
-            <a href="/2023/04/10/hello-world/">Hello World</a>
           </li>
         
           <li>
