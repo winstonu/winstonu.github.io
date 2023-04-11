@@ -88,24 +88,7 @@
     <div class="entry">
       
         <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>项目中一直在使用Drone CI来做CICD，周末的时候突然发现CD失败了，登陆到机器中查看了一下，发现机器的磁盘空间满了，这里记录一下问题的排查过程。</p>
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>先直接来看一下问题现象:<br><img src="/images/16811314262961.jpg"></p>
-<p>可以看到，是由于磁盘空间不够导致CD失败。</p>
-<h2 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a>排查过程</h2><p>上来直接进入构建服务器，输入以下命令：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df -h</span><br></pre></td></tr></table></figure>
-<p>查看到磁盘占用情况:<br><img src="/images/16811088150686.jpg"><br>现在空间是被我清掉了，在清掉之前， docker var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;xxx&#x2F;merged其中一个文件夹里的磁盘占用高达32G.</p>
-<p>查看Docker Volume</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Docker system df</span><br></pre></td></tr></table></figure>
-<p><img src="/images/16811089305443.jpg"><br>也可以清晰的看到docker的镜像与建立的volumes占用的磁盘空间，现在的图片是被我清掉以后，在清掉之前，volume占用空间32G， 50G大小的磁盘被占满，所以才会出现CD的时候写入报错的情况。</p>
-<h2 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h2><p>既然我们已经发现了是由于Docker创建的volume里的数据占用太多导致的问题，那么问题就简单了，我们直接先使用docker volume prune来删除掉没有被容器使用的volume</p>
-<p>通过</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker system df</span><br></pre></td></tr></table></figure>
-<p>可以查看volume的links是否为0,为0时说明没被使用<br><img src="/images/16811173663912.jpg"></p>
-<p>我们确定好哪一个volume占用过大，且LINKS&#x3D;1时， 使用以下命名查看空上volume被哪个容器使用:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -a --filter volume=xxxxxxx</span><br></pre></td></tr></table></figure>
-<p>最终看到这个volume是我之前测试仓库时创建的registry仓库，已经停了好久了，所以直接将这个容器删除，重新执行:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
-<p>这样这个volume就被删除了，磁盘空间也释放了。</p>
-
+        
       
     </div>
 
@@ -171,17 +154,7 @@
 <li>golang 1.20.x</li>
 <li>docker 23.x</li>
 </ul>
-<p>需要注意的是，在macos中， docker与宿主机的通信不是通过Bridge，这个时候如果要使用到了https_proxy,且https_proxy是监听在宿主机上的127.0.0.1:1087这种地址的时候，需要使用host.docker.internal:1087来访问https_proxy（如果不用则不需要设置)</p>
-<h2 id="配置镜像加速器"><a href="#配置镜像加速器" class="headerlink" title="配置镜像加速器"></a>配置镜像加速器</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vi ~/.config/daemon.json</span><br><span class="line">加入: registry-mirrors: [&quot;https://xxxx&quot;]</span><br></pre></td></tr></table></figure>
-<p>重启docker，然后使用docker info检查镜像加速器是否设置成功。</p>
-<h2 id="Build"><a href="#Build" class="headerlink" title="Build"></a>Build</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p github.com/goharbor</span><br><span class="line">git clone </span><br><span class="line">mv harbor github.com/goharbor/</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-<p>上述过程如果完整运行完成，则就可以直接访问Harbor.</p>
-<h2 id="M1上编译"><a href="#M1上编译" class="headerlink" title="M1上编译"></a>M1上编译</h2><p>需要注意的是，如果使用的是M1电脑，由于CPU是Arm64架构，上述镜像做完之后，是启动不起来的，因为编译出来的文件是arm64架构的，需要做交叉编译为amd64<br>在Makefile文件中修改 go build，需要修改的有：compile_core, compile_jobservice<br>直接在go build后边加上:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-e GOOS=linux -e GOARCH=amd64</span><br></pre></td></tr></table></figure>
-
-<h2 id="需要注意的点"><a href="#需要注意的点" class="headerlink" title="需要注意的点"></a>需要注意的点</h2><p>如果在对swagger api没有修改的情况下，因为编译compile_core之前每次都要执行: gen_api，如果可以将gen_api在第一次生成之后，就删除掉这一步骤，这样编译起来就会更快了。</p>
-<p>下一篇将会Harbor源码做简要的分析</p>
-
+        
       
     </div>
 
@@ -241,29 +214,7 @@
     <div class="entry">
       
         <p>Docker在随着云原生热潮下，是所有开发者机器上必不可少的一个工具，今天记录一下docker的安装过程. 本安装教程是基于连网情况下进行安装的，离线安装请移步互联网搜索.</p>
-<h2 id="requirement"><a href="#requirement" class="headerlink" title="requirement"></a>requirement</h2><p>Docker 要求 CentOS 系统的内核版本高于 3.10 ，查看本页面的前提条件来验证你的CentOS 版本是否支持 Docker 。<br>通过 uname -r 命令查看你当前的内核版本</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ uname -r</span><br></pre></td></tr></table></figure>
-<p>使用 root 权限登录 Centos。确保 yum 包更新到最新。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum update</span><br></pre></td></tr></table></figure>
-<p>卸载旧版本(如果安装过旧版本的话)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum remove docker  docker-common docker-selinux docker-engine</span><br></pre></td></tr></table></figure>
-<p>安装需要的软件包， yum-utils 提供yum-config-manager功能，另外两个是devicemapper驱动依赖的</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum install -y yum-utils </span><br></pre></td></tr></table></figure>
-<p>设置yum源</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure>
-<p>可以查看所有仓库中所有docker版本，并选择特定版本安装</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ yum list docker-ce --showduplicates | sort -r</span><br></pre></td></tr></table></figure>
-
-<h2 id="install"><a href="#install" class="headerlink" title="install"></a>install</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum install docker-ce  #由于repo中默认只开启stable仓库，故这里安装的是最新稳定版17.12.0</span><br><span class="line">$ sudo yum install &lt;FQPN&gt;  # 例如：sudo yum install docker-ce-17.12.0.ce</span><br><span class="line">yum install docker-ce-20.10.9</span><br></pre></td></tr></table></figure>
-
-<p> </p>
-<p>启动并加入开机启动</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl start docker</span><br><span class="line">$ sudo systemctl enable docker</span><br></pre></td></tr></table></figure>
-<p>验证安装是否成功(有client和service两部分表示docker安装启动都成功了)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker version</span><br></pre></td></tr></table></figure>
-
-
-
+        
       
     </div>
 
