@@ -13,6 +13,7 @@ Harbor是一个云原生容器镜像仓库，Harbor比原生的registry多了用
 - golang 1.20.x
 - docker 23.x
 
+<!-- more -->
 
 需要注意的是，在macos中， docker与宿主机的通信不是通过Bridge，这个时候如果要使用到了https_proxy,且https_proxy是监听在宿主机上的127.0.0.1:1087这种地址的时候，需要使用host.docker.internal:1087来访问https_proxy（如果不用则不需要设置)
 

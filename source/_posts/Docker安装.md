@@ -9,6 +9,8 @@ categories:
 
 Docker在随着云原生热潮下，是所有开发者机器上必不可少的一个工具，今天记录一下docker的安装过程. 本安装教程是基于连网情况下进行安装的，离线安装请移步互联网搜索.
 
+<!-- more -->
+
 ## requirement
 Docker 要求 CentOS 系统的内核版本高于 3.10 ，查看本页面的前提条件来验证你的CentOS 版本是否支持 Docker 。
 通过 uname -r 命令查看你当前的内核版本
