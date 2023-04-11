@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>记录一次Docker占用磁盘过多的问题 | COOPER x 空间</title>
+
+  
+  <meta name="author" content="cooper">
+  
+
+  
+  <meta name="description" content="概述项目中一直在使用Drone CI来做CICD，周末的时候突然发现CD失败了，登陆到机器中查看了一下，发现机器的磁盘空间满了，这里记录一下问题的排查过程。
+问题先直接来看一下问题现象:
+可以看到，是由于磁盘空间不够导致CD失败。
+排查过程上来直接进入构建服务器，输入以下命令：
+1df -h
+查看到">
+  
+
+  
+  <meta name="keywords" content="云原生、容器">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="记录一次Docker占用磁盘过多的问题"/>
+
+  <meta property="og:site_name" content="COOPER x 空间"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="COOPER x 空间" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">COOPER x 空间</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>记录一次Docker占用磁盘过多的问题</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2023/04/10/记录一次Docker占用磁盘过多的问题/" rel="bookmark">
+        <time class="entry-date published" datetime="2023-04-10T16:43:03.000Z">
+          2023-04-10
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>项目中一直在使用Drone CI来做CICD，周末的时候突然发现CD失败了，登陆到机器中查看了一下，发现机器的磁盘空间满了，这里记录一下问题的排查过程。</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>先直接来看一下问题现象:<br><img src="/images/16811314262961.jpg"></p>
+<p>可以看到，是由于磁盘空间不够导致CD失败。</p>
+<h2 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a>排查过程</h2><p>上来直接进入构建服务器，输入以下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df -h</span><br></pre></td></tr></table></figure>
+<p>查看到磁盘占用情况:<br><img src="/images/16811088150686.jpg"><br>现在空间是被我清掉了，在清掉之前， docker var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;xxx&#x2F;merged其中一个文件夹里的磁盘占用高达32G.</p>
+<p>查看Docker Volume</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Docker system df</span><br></pre></td></tr></table></figure>
+<p><img src="/images/16811089305443.jpg"><br>也可以清晰的看到docker的镜像与建立的volumes占用的磁盘空间，现在的图片是被我清掉以后，在清掉之前，volume占用空间32G， 50G大小的磁盘被占满，所以才会出现CD的时候写入报错的情况。</p>
+<h2 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h2><p>既然我们已经发现了是由于Docker创建的volume里的数据占用太多导致的问题，那么问题就简单了，我们直接先使用docker volume prune来删除掉没有被容器使用的volume</p>
+<p>通过</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker system df</span><br></pre></td></tr></table></figure>
+<p>可以查看volume的links是否为0,为0时说明没被使用<br><img src="/images/16811173663912.jpg"></p>
+<p>我们确定好哪一个volume占用过大，且LINKS&#x3D;1时， 使用以下命名查看空上volume被哪个容器使用:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -a --filter volume=xxxxxxx</span><br></pre></td></tr></table></figure>
+<p>最终看到这个volume是我之前测试仓库时创建的registry仓库，已经停了好久了，所以直接将这个容器删除，重新执行:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
+<p>这样这个volume就被删除了，磁盘空间也释放了。</p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Docker/">Docker</a>, <a href="/categories/Docker/云原生/">云原生</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/Docker/">Docker</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2023 cooper
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

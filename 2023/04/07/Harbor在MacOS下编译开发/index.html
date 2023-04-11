@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Harbor在MacOS下编译开发 | COOPER x 空间</title>
+
+  
+  <meta name="author" content="cooper">
+  
+
+  
+  <meta name="description" content="Harbor是一个云原生容器镜像仓库，Harbor比原生的registry多了用户管理与权限管理功能，所以使用起来还是很方便， 这里记录一下Harbor在MacOS下的编译与扩展开发. 本文是基于Harbor 2.7.0 release测试，别的版本可能会有出入。
+requirment
+Harbor">
+  
+
+  
+  <meta name="keywords" content="云原生、容器">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="Harbor在MacOS下编译开发"/>
+
+  <meta property="og:site_name" content="COOPER x 空间"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="COOPER x 空间" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">COOPER x 空间</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>Harbor在MacOS下编译开发</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2023/04/07/Harbor在MacOS下编译开发/" rel="bookmark">
+        <time class="entry-date published" datetime="2023-04-07T14:56:52.000Z">
+          2023-04-07
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>Harbor是一个云原生容器镜像仓库，Harbor比原生的registry多了用户管理与权限管理功能，所以使用起来还是很方便， 这里记录一下Harbor在MacOS下的编译与扩展开发. 本文是基于Harbor 2.7.0 release测试，别的版本可能会有出入。</p>
+<h2 id="requirment"><a href="#requirment" class="headerlink" title="requirment"></a>requirment</h2><ul>
+<li>Harbor在本地编译时，由于所需的依赖包过多，而且大部分是从dockerhub官方仓库下载，所以在国内有的时候拉取镜像很慢，需要搭配镜像加速器使用。</li>
+<li>另外可能还需要https_proxy</li>
+<li>golang 1.20.x</li>
+<li>docker 23.x</li>
+</ul>
+<p>需要注意的是，在macos中， docker与宿主机的通信不是通过Bridge，这个时候如果要使用到了https_proxy,且https_proxy是监听在宿主机上的127.0.0.1:1087这种地址的时候，需要使用host.docker.internal:1087来访问https_proxy（如果不用则不需要设置)</p>
+<h2 id="配置镜像加速器"><a href="#配置镜像加速器" class="headerlink" title="配置镜像加速器"></a>配置镜像加速器</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vi ~/.config/daemon.json</span><br><span class="line">加入: registry-mirrors: [&quot;https://xxxx&quot;]</span><br></pre></td></tr></table></figure>
+<p>重启docker，然后使用docker info检查镜像加速器是否设置成功。</p>
+<h2 id="Build"><a href="#Build" class="headerlink" title="Build"></a>Build</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p github.com/goharbor</span><br><span class="line">git clone </span><br><span class="line">mv harbor github.com/goharbor/</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<p>上述过程如果完整运行完成，则就可以直接访问Harbor.</p>
+<h2 id="M1上编译"><a href="#M1上编译" class="headerlink" title="M1上编译"></a>M1上编译</h2><p>需要注意的是，如果使用的是M1电脑，由于CPU是Arm64架构，上述镜像做完之后，是启动不起来的，因为编译出来的文件是arm64架构的，需要做交叉编译为amd64<br>在Makefile文件中修改 go build，需要修改的有：compile_core, compile_jobservice<br>直接在go build后边加上:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-e GOOS=linux -e GOARCH=amd64</span><br></pre></td></tr></table></figure>
+
+<h2 id="需要注意的点"><a href="#需要注意的点" class="headerlink" title="需要注意的点"></a>需要注意的点</h2><p>如果在对swagger api没有修改的情况下，因为编译compile_core之前每次都要执行: gen_api，如果可以将gen_api在第一次生成之后，就删除掉这一步骤，这样编译起来就会更快了。</p>
+<p>下一篇将会Harbor源码做简要的分析</p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Harbor/">Harbor</a>, <a href="/categories/Harbor/云原生/">云原生</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/Harbor、registry/">Harbor、registry</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2023 cooper
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>
