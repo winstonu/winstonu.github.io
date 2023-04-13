@@ -3,12 +3,14 @@
 <head>
   <meta charset="utf-8">
   
-  <title>winston&#39;s 空间</title>
+  <title>灵雀云Kube-OVN：基于OVN的开源Kubernetes网络实践 | winston&#39;s 空间</title>
 
   
   <meta name="author" content="winston">
   
 
+  
+  <meta name="description" content="原文近日，灵雀云发布了基于OVN的Kubernetes网络组件Kube-OVN，并正式将其在Github上开源。Kube-OVN提供了大量目前Kubernetes不具备的网络功能，并在原有基础上进行增强。通过将OpenStack领域成熟的网络功能平移到Kubernetes，来应对更加复杂的基础环境和">
   
 
   
@@ -19,7 +21,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-  
+  <meta property="og:title" content="灵雀云Kube-OVN：基于OVN的开源Kubernetes网络实践"/>
 
   <meta property="og:site_name" content="winston&#39;s 空间"/>
 
@@ -62,12 +64,11 @@
 </header>
 
     <main class="site-main posts-loop">
-    
-  <article>
+    <article>
 
   
     
-    <h3 class="article-title"><a href="/2023/04/13/灵雀云Kube-OVN：基于OVN的开源Kubernetes网络实践/"><span>灵雀云Kube-OVN：基于OVN的开源Kubernetes网络实践</span></a></h3>
+    <h3 class="article-title"><span>灵雀云Kube-OVN：基于OVN的开源Kubernetes网络实践</span></h3>
     
   
 
@@ -144,199 +145,16 @@
   </div>
 </article>
 
-
-
-  <article>
-
-  
-    
-    <h3 class="article-title"><a href="/2023/04/10/记录一次Docker占用磁盘过多的问题/"><span>记录一次Docker占用磁盘过多的问题</span></a></h3>
-    
   
 
-  <div class="article-top-meta">
-    <span class="posted-on">
-      <a href="/2023/04/10/记录一次Docker占用磁盘过多的问题/" rel="bookmark">
-        <time class="entry-date published" datetime="2023-04-10T16:43:03.000Z">
-          2023-04-10
-        </time>
-      </a>
-    </span>
-  </div>
-
-
-  
-
-  <div class="article-content">
-    <div class="entry">
-      
-        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>项目中一直在使用Drone CI来做CICD，周末的时候突然发现CD失败了，登陆到机器中查看了一下，发现机器的磁盘空间满了，这里记录一下问题的排查过程。</p>
-        
-      
-    </div>
-
-  </div>
-
-  <div class="article-footer">
-    <div class="article-meta pull-left">
-
-    
-      
-
-    <span class="post-categories">
-      <i class="icon-categories"></i>
-        <a href="/categories/Docker/">Docker</a>, <a href="/categories/Docker/云原生/">云原生</a>
-    </span>
-    
-
-    
-    
-
-    <span class="post-tags">
-      <i class="icon-tags"></i>
-        <a href="/tags/Docker/">Docker</a>
-    </span>
-    
-
-    </div>
-
-    
-  </div>
-</article>
-
-
-
-  <article>
-
-  
-    
-    <h3 class="article-title"><a href="/2023/04/07/Harbor在MacOS下编译开发/"><span>Harbor在MacOS下编译开发</span></a></h3>
-    
-  
-
-  <div class="article-top-meta">
-    <span class="posted-on">
-      <a href="/2023/04/07/Harbor在MacOS下编译开发/" rel="bookmark">
-        <time class="entry-date published" datetime="2023-04-07T14:56:52.000Z">
-          2023-04-07
-        </time>
-      </a>
-    </span>
-  </div>
-
-
-  
-
-  <div class="article-content">
-    <div class="entry">
-      
-        <p>Harbor是一个云原生容器镜像仓库，Harbor比原生的registry多了用户管理与权限管理功能，所以使用起来还是很方便， 这里记录一下Harbor在MacOS下的编译与扩展开发. 本文是基于Harbor 2.7.0 release测试，别的版本可能会有出入。</p>
-<h2 id="requirment"><a href="#requirment" class="headerlink" title="requirment"></a>requirment</h2><ul>
-<li>Harbor在本地编译时，由于所需的依赖包过多，而且大部分是从dockerhub官方仓库下载，所以在国内有的时候拉取镜像很慢，需要搭配镜像加速器使用。</li>
-<li>另外可能还需要https_proxy</li>
-<li>golang 1.20.x</li>
-<li>docker 23.x</li>
-</ul>
-        
-      
-    </div>
-
-  </div>
-
-  <div class="article-footer">
-    <div class="article-meta pull-left">
-
-    
-      
-
-    <span class="post-categories">
-      <i class="icon-categories"></i>
-        <a href="/categories/Harbor/">Harbor</a>, <a href="/categories/Harbor/云原生/">云原生</a>
-    </span>
-    
-
-    
-    
-
-    <span class="post-tags">
-      <i class="icon-tags"></i>
-        <a href="/tags/Harbor、registry/">Harbor、registry</a>
-    </span>
-    
-
-    </div>
-
-    
-  </div>
-</article>
-
-
-
-  <article>
-
-  
-    
-    <h3 class="article-title"><a href="/2023/04/07/Docker安装/"><span>Docker安装</span></a></h3>
-    
-  
-
-  <div class="article-top-meta">
-    <span class="posted-on">
-      <a href="/2023/04/07/Docker安装/" rel="bookmark">
-        <time class="entry-date published" datetime="2023-04-07T10:29:01.000Z">
-          2023-04-07
-        </time>
-      </a>
-    </span>
-  </div>
-
-
-  
-
-  <div class="article-content">
-    <div class="entry">
-      
-        <p>Docker在随着云原生热潮下，是所有开发者机器上必不可少的一个工具，今天记录一下docker的安装过程. 本安装教程是基于连网情况下进行安装的，离线安装请移步互联网搜索.</p>
-        
-      
-    </div>
-
-  </div>
-
-  <div class="article-footer">
-    <div class="article-meta pull-left">
-
-    
-      
-
-    <span class="post-categories">
-      <i class="icon-categories"></i>
-        <a href="/categories/Docker/">Docker</a>, <a href="/categories/Docker/云原生/">云原生</a>
-    </span>
-    
-
-    
-    
-
-    <span class="post-tags">
-      <i class="icon-tags"></i>
-        <a href="/tags/Docker、云原生/">Docker、云原生</a>
-    </span>
-    
-
-    </div>
-
-    
-  </div>
-</article>
 
 
 
 
-<nav class="pagination">
-  
-  
-</nav>
+
+
+
+
     </main>
 
     <footer class="site-footer">
