@@ -1,8 +1,10 @@
 ---
 title: 灵雀云Kube-OVN：基于OVN的开源Kubernetes网络实践
 date: 2023-04-13 09:36:04
-tags:
+tags: kubeovn
+categories:
 - kubeovn
+- 网络
 ---
 [原文](https://zhuanlan.zhihu.com/p/464815452)
 近日，灵雀云发布了基于OVN的Kubernetes网络组件Kube-OVN，并正式将其在Github上开源。Kube-OVN提供了大量目前Kubernetes不具备的网络功能，并在原有基础上进行增强。通过将OpenStack领域成熟的网络功能平移到Kubernetes，来应对更加复杂的基础环境和应用合规性要求。
