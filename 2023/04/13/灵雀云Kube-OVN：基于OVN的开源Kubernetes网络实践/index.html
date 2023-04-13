@@ -10,7 +10,9 @@
   
 
   
-  <meta name="description" content="原文近日，灵雀云发布了基于OVN的Kubernetes网络组件Kube-OVN，并正式将其在Github上开源。Kube-OVN提供了大量目前Kubernetes不具备的网络功能，并在原有基础上进行增强。通过将OpenStack领域成熟的网络功能平移到Kubernetes，来应对更加复杂的基础环境和">
+  <meta name="description" content="原文近日，灵雀云发布了基于OVN的Kubernetes网络组件Kube-OVN，并正式将其在Github上开源。Kube-OVN提供了大量目前Kubernetes不具备的网络功能，并在原有基础上进行增强。通过将OpenStack领域成熟的网络功能平移到Kubernetes，来应对更加复杂的基础环境和应用合规性要求。
+目前Kube-OVN项目代码已经在Github 上开源，项目地址为：https://github.com/alauda/kube-ovn。项目使用宽松的Apache 2.0 协议，欢迎更多技术开发者和爱好者前去试用和使用。
+网络插件那么多，为什么还需要Kube-OVN？">
   
 
   
@@ -91,6 +93,8 @@
         <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/464815452">原文</a><br>近日，灵雀云发布了基于OVN的Kubernetes网络组件Kube-OVN，并正式将其在Github上开源。Kube-OVN提供了大量目前Kubernetes不具备的网络功能，并在原有基础上进行增强。通过将OpenStack领域成熟的网络功能平移到Kubernetes，来应对更加复杂的基础环境和应用合规性要求。</p>
 <p>目前Kube-OVN项目代码已经在Github 上开源，项目地址为：<a target="_blank" rel="noopener" href="https://github.com/alauda/kube-ovn%E3%80%82%E9%A1%B9%E7%9B%AE%E4%BD%BF%E7%94%A8%E5%AE%BD%E6%9D%BE%E7%9A%84Apache">https://github.com/alauda/kube-ovn。项目使用宽松的Apache</a> 2.0 协议，欢迎更多技术开发者和爱好者前去试用和使用。</p>
 <p>网络插件那么多，为什么还需要Kube-OVN？</p>
+<span id="more"></span>
+
 <p>网络插件千千万，为什么还要开发Kube-OVN？从当前Kubernetes网络现状来看，Kubernetes 网络相关的组件非常分散。例如，CNI 负责基础容器网络，它本身只是个接口标准，社区和市场上都有很多各自的实现；集群内的服务发现网络需要依赖 kube-proxy，而 kube-proxy 又有 iptables 和 ipvs 两种实现；集群内的 DNS 需要依赖额外组件kube-dns 或coredns；集群对外访问的负载均衡器服务需要依赖各个云厂商提供的Cloud-Provider；网络策略的 NetworkPolicy 本身只是一个标准接口，社区中也有各自不同的实现。此外还有 ingress，Kubernetes提供的只是一个标准接口，社区中同样有各自的实现。</p>
 <p>分散的网络组件导致容器网络流量被分散到了不同的网络组件上，一旦出现问题需要在多个组件间游走逐个排查。在实际运维过程中网络问题通常是最难排查的，需要维护人员掌握全链路上所有组件的使用、原理以及排查方式。因此，如果有一个网络方案能够将所有数据平面统一，那么出现问题时只需要排查一个组件即可。</p>
 <p>其次，现有网络插件种类繁多，但是在落地时会发现，每个网络插件由于覆盖的功能集合不同，很难在所有场景使用同一套方案。为了满足不同的客户需求，很多厂商一度同时支持多种网络方案，给自身带来很大负担。在落地过程中，还发现很多传统的网络方案在容器网络中是缺失的。一些高级功能是所有网络插件都无法满足的，比如：子网划分、vlan 绑定、nat、qos、固定 IP、基于acl的网络策略等等。</p>
