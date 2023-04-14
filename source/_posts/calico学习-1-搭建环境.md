@@ -1,7 +1,9 @@
 ---
 title: calico学习(1)-搭建环境
+date: 2023-04-14 15:00:43
 tags:
 ---
+
 ## 搭建kubernets
 我只有一个云服务器，2c2G，所以搭建一个单节点的Kubernetes，在这个单节点的Kubernetes开启我的calico之旅。
 ## 安装工具
@@ -80,4 +82,44 @@ curl -O -L  https://github.com/projectcalico/calicoctl/releases/download/v3.15.5
 chmod +x calicoctl
 ```
 你还可以安装calicaoctl的容器，使用容器来代替工具，效果是一样的，可以参考官方文档，这里不介绍了。
-下一单我们介绍一下calicoctl的配置，用来连接calico的datastore(etcd或者Kubernetes datastore).
+
+## 配置calicoctl
+calicoctl目标是使用命令行访问calico datastore. 在大多数情况下，calicotl默认不能连接到datastore， 所以需要提供一些连接信息。
+1. 默认情况calicoctl会寻找/etc/calico/calioctl.cfg配置文件， 同时你也可以使用--config标志传递相应配置来代替这个配置文件。这个文件的例子:
+```
+apiVersion: projectcalico.org/v3
+kind: CalicoAPIConfig
+metadata:
+spec:
+  datastoreType: "etcdv3"
+  etcdEndpoints: "http://etcd1:2379,http://etcd2:2379"
+  ...
+
+```
+2. 同时可以通过环境变量来设置连接信息
+### etcd datastore
+例:
+```
+apiVersion: projectcalico.org/v3
+kind: CalicoAPIConfig
+metadata:
+spec:
+  etcdEndpoints: https://etcd1:2379,https://etcd2:2379,https://etcd3:2379
+  etcdKeyFile: /etc/calico/key.pem
+  etcdCertFile: /etc/calico/cert.pem
+  etcdCACertFile: /etc/calico/ca.pem
+
+```
+通过环境变量:
+```
+ETCD_ENDPOINTS=http://localhost:2379 calicoctl get bgppeers
+```
+由于我的机器默认datastore是kubernetes datastore，所以这里不展示内容。
+### Kubernetes API datastore
+```
+DATASTORE_TYPE=kubernetes KUBECONFIG=~/.kube/config calicoctl get nodes
+```
+执行上边的命令就会返回信息如下:
+![](/images/16814555314472.jpg)
+可以看到没有使用到ssl证书，如果使用到了在/etc/calico/calico.cfg里配置即可。
+这样calico的环境就搭建好了
