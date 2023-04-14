@@ -11,7 +11,7 @@
   
   <title>
     
-      Docker安装 
+      archive_a: 2020/4 
       
       
       |
@@ -102,165 +102,75 @@
 
 
       <div class="flex-container">
-        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
-<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+        <!-- 归档页，展示本站所有文章，按照年份降序归类，url形式：https://yoursite/archives/ -->
 
+<!-- last: 按年份把文章分组，当前遍历到的年份 -->
+<!-- now: 当前遍历到的文章的发布年份 -->
 
-  <!-- LaTex Display -->
-
-  
-    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
-  
-  <script>
-    MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']]
-      }
-    }
-  </script>
-
-
-
-
-
-  <!-- clipboard -->
-
-  
-    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
-  
-  
-<script src="/js/codeCopy.js"></script>
-
-
-
-
-
-
-
-  
-
-  
-
-  
-
-  
-  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
-  <div class="container post-details" id="post-details">
-    <div class="post-content">
-      <div class="post-title">Docker安装</div>
-      <div class="post-attach">
-        <span class="post-pubtime">
-          <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
-          2023-04-07 10:29:01
-        </span>
-        
-              <span class="post-tags">
-                <i class="iconfont icon-tags mr-10" title="Tags"></i>
-                
-                <span class="span--tag mr-8">
-                  <a href="/tags/Docker%E3%80%81%E4%BA%91%E5%8E%9F%E7%94%9F/" title="Docker、云原生">
-                    #Docker、云原生
-                  </a>
-                </span>
-                
-              </span>
-          
-      </div>
-      <div class="markdown-body">
-        <p>Docker在随着云原生热潮下，是所有开发者机器上必不可少的一个工具，今天记录一下docker的安装过程. 本安装教程是基于连网情况下进行安装的，离线安装请移步互联网搜索.</p>
-<span id="more"></span>
-
-<h2 id="requirement"><a href="#requirement" class="headerlink" title="requirement"></a>requirement</h2><p>Docker 要求 CentOS 系统的内核版本高于 3.10 ，查看本页面的前提条件来验证你的CentOS 版本是否支持 Docker 。<br>通过 uname -r 命令查看你当前的内核版本</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ uname -r</span><br></pre></td></tr></table></figure>
-<p>使用 root 权限登录 Centos。确保 yum 包更新到最新。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum update</span><br></pre></td></tr></table></figure>
-<p>卸载旧版本(如果安装过旧版本的话)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum remove docker  docker-common docker-selinux docker-engine</span><br></pre></td></tr></table></figure>
-<p>安装需要的软件包， yum-utils 提供yum-config-manager功能，另外两个是devicemapper驱动依赖的</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum install -y yum-utils </span><br></pre></td></tr></table></figure>
-<p>设置yum源</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure>
-<p>可以查看所有仓库中所有docker版本，并选择特定版本安装</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ yum list docker-ce --showduplicates | sort -r</span><br></pre></td></tr></table></figure>
-
-<h2 id="install"><a href="#install" class="headerlink" title="install"></a>install</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum install docker-ce  #由于repo中默认只开启stable仓库，故这里安装的是最新稳定版17.12.0</span><br><span class="line">$ sudo yum install &lt;FQPN&gt;  # 例如：sudo yum install docker-ce-17.12.0.ce</span><br><span class="line">yum install docker-ce-20.10.9</span><br></pre></td></tr></table></figure>
-
-<p> </p>
-<p>启动并加入开机启动</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl start docker</span><br><span class="line">$ sudo systemctl enable docker</span><br></pre></td></tr></table></figure>
-<p>验证安装是否成功(有client和service两部分表示docker安装启动都成功了)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker version</span><br></pre></td></tr></table></figure>
-
-
-
-      </div>
-      
-        <div class="prev-or-next">
-          <div class="post-foot-next">
-            
-          </div>
-          <div class="post-attach">
-            <span class="post-pubtime">
-              <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
-              2023-04-07 10:29:01
-            </span>
-            
-                  <span class="post-tags">
-                    <i class="iconfont icon-tags mr-10" title="Tags"></i>
-                    
-                    <span class="span--tag mr-8">
-                      <a href="/tags/Docker%E3%80%81%E4%BA%91%E5%8E%9F%E7%94%9F/" title="Docker、云原生">
-                        #Docker、云原生
-                      </a>
-                    </span>
-                    
-                  </span>
-              
-          </div>
-          <div class="post-foot-prev">
-            
-              <a href="/2023/04/07/Harbor%E5%9C%A8MacOS%E4%B8%8B%E7%BC%96%E8%AF%91%E5%BC%80%E5%8F%91/" target="_self">
-                <span>Next</span>
-                <i class="iconfont icon-chevronright"></i>
-              </a>
-            
-          </div>
+<div class="container archives">
+  <div class="post-list">
+    
+        <!-- 后续文章的发布年份呈现 -->
+        <div class="content-title">
+          <h2>
+            <span>2023</span>
+          </h2>
         </div>
       
-    </div>
+      <div class="post-item" title="calico学习(1)-搭建环境">
+        <div class="time-m-d">04-14</div>
+        <div class="title">
+          <a href="/2023/04/14/calico%E5%AD%A6%E4%B9%A0-1-%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83/">
+            <span>calico学习(1)-搭建环境</span>
+          </a>
+        </div>
+      </div>
     
-  <div id="btn-catalog" class="btn-catalog">
-    <i class="iconfont icon-catalog"></i>
-  </div>
-  <div class="post-catalog hidden" id="catalog">
-    <div class="title">Contents</div>
-    <div class="catalog-content">
-      
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#requirement"><span class="toc-text">requirement</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#install"><span class="toc-text">install</span></a></li></ol>
-      
-    </div>
-  </div>
-
-  
-<script src="/js/catalog.js"></script>
-
-
-
-
+      <div class="post-item" title="灵雀云Kube-OVN：基于OVN的开源Kubernetes网络实践">
+        <div class="time-m-d">04-13</div>
+        <div class="title">
+          <a href="/2023/04/13/%E7%81%B5%E9%9B%80%E4%BA%91Kube-OVN%EF%BC%9A%E5%9F%BA%E4%BA%8EOVN%E7%9A%84%E5%BC%80%E6%BA%90Kubernetes%E7%BD%91%E7%BB%9C%E5%AE%9E%E8%B7%B5/">
+            <span>灵雀云Kube-OVN：基于OVN的开源Kubernetes网络实践</span>
+          </a>
+        </div>
+      </div>
     
-      <div class="comments-container">
-        
-
-
-
-
-
-
-
+      <div class="post-item" title="记录一次Docker占用磁盘过多的问题">
+        <div class="time-m-d">04-10</div>
+        <div class="title">
+          <a href="/2023/04/10/%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1Docker%E5%8D%A0%E7%94%A8%E7%A3%81%E7%9B%98%E8%BF%87%E5%A4%9A%E7%9A%84%E9%97%AE%E9%A2%98/">
+            <span>记录一次Docker占用磁盘过多的问题</span>
+          </a>
+        </div>
+      </div>
+    
+      <div class="post-item" title="Harbor在MacOS下编译开发">
+        <div class="time-m-d">04-07</div>
+        <div class="title">
+          <a href="/2023/04/07/Harbor%E5%9C%A8MacOS%E4%B8%8B%E7%BC%96%E8%AF%91%E5%BC%80%E5%8F%91/">
+            <span>Harbor在MacOS下编译开发</span>
+          </a>
+        </div>
+      </div>
+    
+        <!-- 后续文章的发布年份呈现 -->
+        <div class="content-title">
+          <h2>
+            <span>2020</span>
+          </h2>
+        </div>
+      
+      <div class="post-item" title="Docker安装">
+        <div class="time-m-d">04-07</div>
+        <div class="title">
+          <a href="/2020/04/07/Docker%E5%AE%89%E8%A3%85/">
+            <span>Docker安装</span>
+          </a>
+        </div>
       </div>
     
   </div>
-
+</div>
 
         
 <div class="footer">
@@ -515,24 +425,6 @@
 
 
         
-  
-    <div class="share-icon tools-bar-item">
-      <a href="javascript: void(0)" id="share-icon">
-        <i class="iconfont iconshare"></i>
-      </a>
-      <div class="share-content hidden">
-        
-          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + Docker%E5%AE%89%E8%A3%85 + '&url=' + http%3A%2F%2Fexample.com%2F2023%2F04%2F07%2FDocker%25E5%25AE%2589%25E8%25A3%2585%2F + '" target="_blank" title="Twitter">
-            <i class="iconfont icon-twitter"></i>
-          </a>
-        
-        
-          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://example.com/2023/04/07/Docker%E5%AE%89%E8%A3%85/" target="_blank" title="Facebook">
-            <i class="iconfont icon-facebooksquare"></i>
-          </a>
-        
-      </div>
-    </div>
   
   
 <script src="/js/shares.js"></script>
