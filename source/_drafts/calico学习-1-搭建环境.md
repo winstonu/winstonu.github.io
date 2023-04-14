@@ -50,12 +50,34 @@ EOF
 另外容器运行时建议使用systemd driver而不是cgroupfs driver，主要是因为kubeadm像管理systemd service一样管理kubelet
 ## 创建cluster
  ```
- kubeadm init
+ kubeadm init --pod-network-cidr=192.168.0.0/16 --image-repository registry.aliyuncs.com/google_containers --kubernetes-version v1.18.5
  ```
  我这里直接使用v1.18.5，因为1.24以后要安装containerd，我机器配置低，装太多东西就卡。
  
  ## 安装calico
- 安装calico
+ 安装calico，需要注意的是，最新版本的calico是3.25，面向的是kubernetes v1.23以后的版本， 去官网查阅以后，发现1.18.5版本的k8s安装calico 3.15即可。
  ```
- kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/tigera-operator.yaml
+ kubectl create -f https://docs.projectcalico.org/archive/v3.15/manifests/tigera-operator.yaml
+kubectl create -f https://docs.projectcalico.org/archive/v3.15/manifests/custom-resources.yaml
+
  ```
+ 街tigera-operator下载完镜像，启动之后，就可以使用以下命令来查看calico组件安装状态:
+ ```
+ watch kubectl get po -n calico-system
+ ```
+ ![](/images/16814384249497.jpg)
+当所有组件都Running之后，可看kubernetes节点状态:
+```
+kubectl get node
+```
+![](/images/16814384614003.jpg)
+可以看到节点状态Ready， 说明我们calico安装成功了。后边所有的calico测试都在这个环境里进行。
+
+## 安装calicoctl
+calicoctl用来管理calico资源对象的安装、删除、更新等操作。calico对象一般保存在etcd或者Kubernetes里，跟你安装的选项有关，一般默认在Kubernetes,可以使用以下命令安装:
+```
+curl -O -L  https://github.com/projectcalico/calicoctl/releases/download/v3.15.5/calicoctl
+chmod +x calicoctl
+```
+你还可以安装calicaoctl的容器，使用容器来代替工具，效果是一样的，可以参考官方文档，这里不介绍了。
+下一单我们介绍一下calicoctl的配置，用来连接calico的datastore(etcd或者Kubernetes datastore).
