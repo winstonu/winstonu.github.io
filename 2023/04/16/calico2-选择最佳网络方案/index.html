@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-Hans" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="keywords" content="云原生、容器" />
+  <meta name="author" content="winston" />
+  <meta name="description" content="" />
+  
+  
+  <title>
+    
+      calico2-选择最佳网络方案 
+      
+      
+      |
+    
+     winston&#39;s 空间
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <link rel="icon" href="/images/favicon.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img src="/images/avatar.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/">Winston</a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">Archives</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="nav-item" data-path="/about/">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">calico2-选择最佳网络方案</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
+          2023-04-16 00:18:00
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="Tags"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/Network/" title="Network">
+                    #Network
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h2 id="重点"><a href="#重点" class="headerlink" title="重点"></a>重点</h2><p>熟悉calico各种网络方案，可以根据自己需求选择最佳方案。<br>包含运行插件能力，像CNI和IPAM，还有底层网络类型，non-overlay或者overlay模型， 使用或者不使用BGP等。</p>
+<h2 id="Kubernetes网络基础"><a href="#Kubernetes网络基础" class="headerlink" title="Kubernetes网络基础"></a>Kubernetes网络基础</h2><p>Kubernetes网络模型有以下2个特点:</p>
+<ul>
+<li>每个Pod有一个独立的IP</li>
+<li>Pod在每个节点上可以不使用NAT进与别的节点上的Pod通信<br>在这种模型之下，可以把Pod当作VM或者物理节点看待，实现一些基础的商品分配、服务发现、负载均等， 还能使用基础的网络策略来对流量进行管理。</li>
+</ul>
+<h2 id="CNI插件"><a href="#CNI插件" class="headerlink" title="CNI插件"></a>CNI插件</h2><p>CNI(Container Network Interafce)是一种标准API规范，各种网络插件可以实现这些规范，提供给Kubernetes使用， Kubernetes在创建或者销毁Pod的时候会调用这些API. 有2种类型的CNI插件</p>
+<ul>
+<li>CNI Network Plugin: 负责添加或者删除Pod到Kubernetes网络里， 包含创建、删除Pod的网络设备</li>
+<li>CNI IPAM Plugin： 负责分配、回收IP资源，分配CIDR给每个Node, 获取underlay网络分给Pod的IP</li>
+</ul>
+<h2 id="Cloud-Provider-integrations"><a href="#Cloud-Provider-integrations" class="headerlink" title="Cloud Provider integrations"></a>Cloud Provider integrations</h2><p>Kubernetes cloud provider integrations 是云服务商的一些特殊控制器用来提供Kubernetes的Network. 基于不同的云提供商的编程实现，就能清楚Pod的流量。</p>
+<h2 id="Kubenet"><a href="#Kubenet" class="headerlink" title="Kubenet"></a>Kubenet</h2><p>Kubenet是Kuernetes原生的网络插件，这个插件没有实现跨Node网络和策略，更多的时候这个插件和Cloud Provider integrations一起使用，能够在cloud provider network里设置路由用来节点之间的通信， 或者在一些单节点环境中工作，需要注意的是，Kubenet与calico不兼容。</p>
+<h2 id="Overlay-networks（覆盖网络"><a href="#Overlay-networks（覆盖网络" class="headerlink" title="Overlay networks（覆盖网络)"></a>Overlay networks（覆盖网络)</h2><p>什么是overlay network?<br>所谓overlay network就是基于别的网络上构建出来的上层网络就是overlay.在Kubernetes中， Underlay网络不清楚Pod ip也不清楚Pod在节点的运行情况，Overlay网络可以用来处理pod-to-pod的流量。</p>
+<p>覆盖网络的工作原理是将底层网络不知道如何处理的网络数据包封装在底层网络知道如何处理的外层数据包中(例如使用 pod IP 地址)。有2种比较常见的网络协议用来封包：vxlan和IP-in-IP.</p>
+<p>优点:<br>使用Overlay network不用太关心底层网络的实现。<br>缺点：</p>
+<ul>
+<li>性能损耗， 由于多了一些封包拆包工作，消耗一些CPU。</li>
+<li>另外就是Pod ip在集群之外没有路由</li>
+</ul>
+<h2 id="Cross-subnet-overlays-跨子网-overlay"><a href="#Cross-subnet-overlays-跨子网-overlay" class="headerlink" title="Cross-subnet overlays(跨子网 overlay)"></a>Cross-subnet overlays(跨子网 overlay)</h2><p>除了标准的overlay network(vxlan, ipip), calico也支持跨子网的vxlan和ipip.在这种模式下， underlaying network充当了二层网络角色，数据帧在同一个subnet里传输的时候不做封包， 所以性能没有损失。在不同subnet里做封包操作， 像是一个标准overlay network一样。</p>
+<h2 id="Pod-IP在集群之外的路由"><a href="#Pod-IP在集群之外的路由" class="headerlink" title="Pod IP在集群之外的路由"></a>Pod IP在集群之外的路由</h2><p>没的Kubernetes network实现的区别可能是: Pod IP能否跨跃集群之外路由。</p>
+<h3 id="不可路由-Not-routable"><a href="#不可路由-Not-routable" class="headerlink" title="不可路由(Not routable)"></a>不可路由(Not routable)</h3><p>如果不可路由，那么当一个Pod ip需要访问集群之外的地址时， Kubernetes会使SNAT(Source Network Address Translation)，目的是为了改变Pod的原始IP地址，相当于是宿主机地址到Pod地址的一种映射， 任何回包也会自动的通过DNAT回到Pod里.</p>
+<p>外部的服务无法直接访问Pod里的服务，需要通过Kubernetes servcies或者Kubernetes Ingress.</p>
+<h3 id="可路由"><a href="#可路由" class="headerlink" title="可路由"></a>可路由</h3><p>内部Pod可以直接访问集群之外服务， 外部也可以直接访问Pod。有以下特点:</p>
+<ul>
+<li>省去的SNAT，DNAT， 可以直接与边界网络集成，方便调试与观察日志</li>
+<li>不再需要使用Kubernetes service, ingress.</li>
+</ul>
+<p>缺点:<br>IP在不同的集群里要使用不同的CIDR，如果集群规模较大或者集群较多，会导致IP耗尽。</p>
+<p>那是什么来决定是否可路由呢 ？</p>
+<ul>
+<li>如果你使用了Overlay network, 则Pod无法路由</li>
+<li>如果没有使用overlay network,则是否可以路由取决于你使用了CNI插件类型、云提供商集群，以及使用的BGP.</li>
+</ul>
+<h2 id="BGP"><a href="#BGP" class="headerlink" title="BGP"></a>BGP</h2><h2 id="关于Calico网络"><a href="#关于Calico网络" class="headerlink" title="关于Calico网络"></a>关于Calico网络</h2><p>Calico灵活的架构模块包含:</p>
+<ul>
+<li>Calico Network plugin: 使用veth pair来连接pods和宿主机的网络L3路由。这个L3架构避免了许多其它Kubernetes网络解决方案里L2桥的不必要的复杂性和性能开销。</li>
+<li>Calico CNI IPAM plugin</li>
+<li>Overlay network modes</li>
+<li>Non-overlay network modes</li>
+<li>Network policy enforcement： Calico 的网络策略执行引擎实现了 Kubernetes 网络策略的全部功能，加上 Calico 网络策略的扩展功能。这与 Calico 内置的网络模式，或任何其他 Calico 兼容的网络插件和云提供商集成相结合。</li>
+</ul>
+<h2 id="网络选项"><a href="#网络选项" class="headerlink" title="网络选项"></a>网络选项</h2><p>预置:<br>calico默认使用的是non-overlay， 使用BGP to Peer和宿主机物理网络使得Pod的IP可以在集群外路由(可以通过配置来禁止在集群外路由)。<br>如果不能将BGP同步到物理网络，你可以使用一个L2网络， Calico 只是在集群中的节点之间使用BGP互联。这不是一个overlay netwrok, 因为边界网络没有pod ip的路由规则.<br>另外calico 与其它云厂商提供的plugin兼容，比如: AWS、Azure、Google Cloud、IBM Cloud</p>
+<h2 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h2><p>以上概念深入了解能帮助我们更好的来选择我们网络模式，如果还不清楚，初学者可以直接使用overlay netwrok vxlan，而不用太关心各种选项的不同。</p>
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/2023/04/14/calico%E5%AD%A6%E4%B9%A0-1-%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>Prev</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="Update time"></i>
+              2023-04-16 00:18:00
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="Tags"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/Network/" title="Network">
+                        #Network
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">Contents</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8D%E7%82%B9"><span class="toc-text">重点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kubernetes%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80"><span class="toc-text">Kubernetes网络基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CNI%E6%8F%92%E4%BB%B6"><span class="toc-text">CNI插件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Cloud-Provider-integrations"><span class="toc-text">Cloud Provider integrations</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kubenet"><span class="toc-text">Kubenet</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Overlay-networks%EF%BC%88%E8%A6%86%E7%9B%96%E7%BD%91%E7%BB%9C"><span class="toc-text">Overlay networks（覆盖网络)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Cross-subnet-overlays-%E8%B7%A8%E5%AD%90%E7%BD%91-overlay"><span class="toc-text">Cross-subnet overlays(跨子网 overlay)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod-IP%E5%9C%A8%E9%9B%86%E7%BE%A4%E4%B9%8B%E5%A4%96%E7%9A%84%E8%B7%AF%E7%94%B1"><span class="toc-text">Pod IP在集群之外的路由</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%8F%AF%E8%B7%AF%E7%94%B1-Not-routable"><span class="toc-text">不可路由(Not routable)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E8%B7%AF%E7%94%B1"><span class="toc-text">可路由</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BGP"><span class="toc-text">BGP</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8ECalico%E7%BD%91%E7%BB%9C"><span class="toc-text">关于Calico网络</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E9%80%89%E9%A1%B9"><span class="toc-text">网络选项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E6%9D%9F"><span class="toc-text">结束</span></a></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          <a title="github" target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">
+            <i class="iconfont icon-github"></i>
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Copyright © 2023 Oranges</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+</div>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="Search...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>First search, index file loading, please wait...<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>No result<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>The search.xml file was not found, please refer to：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>The request failed, Try to refresh the page or try again later.<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + calico2-%E9%80%89%E6%8B%A9%E6%9C%80%E4%BD%B3%E7%BD%91%E7%BB%9C%E6%96%B9%E6%A1%88 + '&url=' + http%3A%2F%2Fexample.com%2F2023%2F04%2F16%2Fcalico2-%25E9%2580%2589%25E6%258B%25A9%25E6%259C%2580%25E4%25BD%25B3%25E7%25BD%2591%25E7%25BB%259C%25E6%2596%25B9%25E6%25A1%2588%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://example.com/2023/04/16/calico2-%E9%80%89%E6%8B%A9%E6%9C%80%E4%BD%B3%E7%BD%91%E7%BB%9C%E6%96%B9%E6%A1%88/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
+  
+  
+<script src="/js/shares.js"></script>
+
+
+
+      </div>
+    </div>
+  </body>
+</html>
