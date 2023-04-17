@@ -1,6 +1,7 @@
 ---
 title: calico学习(1)-搭建环境
 date: 2023-04-14 15:00:43
+updateDate: 2023-04-17 17:00:00
 tags:
 ---
 
@@ -123,3 +124,48 @@ DATASTORE_TYPE=kubernetes KUBECONFIG=~/.kube/config calicoctl get nodes
 ![](/images/16814555314472.jpg)
 可以看到没有使用到ssl证书，如果使用到了在/etc/calico/calico.cfg里配置即可。
 这样calico的环境就搭建好了
+
+## 更新
+在测试环境里，上边搭建一个Kubernetes还是太烦琐了， 直接使用Kind来快速搭建一个K8S control-plane或者多节点进行测试都是可以的。
+[Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+我这里直接拿calico里的sing-node.yaml来配置
+```
+# Configuration for a local kind cluster that deploys a control plane node
+# and nothing else - useful for tests which do not need real nodes and just need
+# an apiserver, etc.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  disableDefaultCNI: true
+  podSubnet: "192.168.0.0/16"
+nodes:
+# For libcalico-go tests, we only need a control plane node.
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 8080
+    hostPort: 8080
+kubeadmConfigPatches:
+- |
+  apiVersion: kubeadm.k8s.io/v1beta3
+  kind: ClusterConfiguration
+  metadata:
+    name: config
+  controllerManager:
+    extraArgs:
+      cluster-cidr: "192.168.0.0/16"
+- |
+  apiVersion: kubeproxy.config.k8s.io/v1alpha1
+  kind: KubeProxyConfiguration
+  metadata:
+    name: config
+  mode: ipvs
+  conntrack:
+    maxPerCore: 0
+
+```
+
+然后直接执行:
+```
+kind create cluster --config sing-node.yaml
+```
+这样一个K8S control-plane就以docker容器的形式起来了，因为配置里我禁用了默认的cni插件,如果通过kubectl get node会发现Node是NotReady状态， 所以我们可以直接根据官网安装calico即可。
